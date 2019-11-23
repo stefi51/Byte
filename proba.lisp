@@ -15,7 +15,7 @@
 )
 
 )
- ;(print (praviTablu 8 8))
+
 
 (defun napuniTablu (praznaTabla )
 
@@ -61,6 +61,29 @@
 
 )
 
+
+(defun inicijalnoStanje (tabla velicinaTable)
+
+		(list tabla "X" '(0 0) velicinaTable)
+
+	)
+
+
+
+(defun proveriCiljnoStanje (stanje velicinaTable);;ako je pobedio x vraca "X" isto i za "O" 
+
+		
+(if  (= velicinaTable 8) (if (= (caaddr stanje) 2) "X"  (if (= (car(cdaddr stanje)) 2) "O" '()    ))
+
+	(if (= (caaddr stanje) 3) "X"  (if (= (car(cdaddr stanje)) 3) "O" '()    ))
+
+	)
+
+	
+
+)
+
+;(print (proveriCiljnoStanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) 8)) 
 
 
 (defun zetoniNaTabli (tabla index);poziva se sa index=0   vraca polja na kojima su zetoni ((x y) (x y) ......)
