@@ -96,9 +96,9 @@
 
 (cond  ((null red) '())
 
-	( (or (equal (car red) '("B")) (equal (car red) '(".")  ))   (proveriRed (cdr red) indexReda (1+ indexKolone))           )
+	( (or (equal (car red) '("B")) (equal (car red) '(".")  )  (equal (car red) '()  ) )   (proveriRed (cdr red) indexReda (1+ indexKolone))           )
 
-
+;dodato za null stefan
         (t  (cons  (cons indexReda (list indexKolone))   (proveriRed (cdr red) indexReda (1+ indexKolone))  ))
 )	)
 
@@ -200,19 +200,231 @@
 
 
 
-(defun CrtajMatrica (matrica brVrste)
- ( cond ( (null matrica) '())
+(setq listaSlova '("A" "B" "C" "D" "E" "F" "G" "H" "I" "J"))
+
+(defun kreirajString ( n q pomeraj tacno)
+
+  (cond ( (< q n) (if (equal tacno t) (concatenate 'string "~" (write-to-string pomeraj) "t~a" (kreirajString n (+ q 1) (+ pomeraj 5) (not tacno)))   
+
+     (concatenate 'string "~" (write-to-string pomeraj) "t~a" (kreirajString n (+ q 1) (+ pomeraj 6 ) (not tacno))) 
+    ))
+
+  (t (concatenate 'string "~" (write-to-string (+ pomeraj )) "t~a"))
+)
+)
+
+
+(defun crtajMatricaPom (matrica brVrste)
+  
+ ( cond ( (null matrica) (terpri))
  				( t
 
-						(format t "~{~a~^ ~}"	( crtajVrstu (car matrica) brVrste 1 1))
+						(format t "~5T~{~a~^ ~}"	( crtajVrstu (car matrica) brVrste 1 1))
 						(terpri)
-						(format t "~{~a~^ ~}"		(crtajVrstu (car matrica) brVrste 2 1))
+						(format t "~1T~a~5t~{~a~^ ~}"	(nth (- brVrste 1) listaSlova)	(crtajVrstu (car matrica) brVrste 2 1))
 						(terpri)
-						(format t "~{~a~^ ~}"			(crtajVrstu (car matrica) brVrste 3 1))
+						(format t "~5T~{~a~^ ~}"			(crtajVrstu (car matrica) brVrste 3 1))
 						(terpri)
 
-						(CrtajMatrica (cdr matrica) (1+ brVrste))
+						(crtajMatricaPom (cdr matrica) (1+ brVrste))
 					   )
 )
 )
-(print (CrtajMatrica  (inicijalizuj (praviTablu 8 8)  )  1))
+
+
+(defun crtajMatricu (matrica) 
+ 
+  (progn
+     (terpri)
+    (format t (kreirajString (cadddr stanje) 1 7 t) 1 2 3 4 5 6 7 8 9 10)
+    (terpri)
+     (terpri)
+     (CrtajMatricaPom (car stanje)  1)
+    )
+  )
+
+
+(defun proveraCrnoPolje ( x y)
+   (
+   		cond ( (and (equalp(mod x 2) 0) (equalp (mod y 2) 0)) t )
+   		     ( (and (equalp(mod x 2) 1 ) (equalp (mod y 2) 1)) t)
+   		     ( t nil)
+   )
+)
+
+
+(defun vratiPolje (x y)
+
+	 ( nth y (nth x (car stanje)))
+)
+
+
+(defun izdvojiDiskoveZaPrebacivanje (listaZaPrebacivanje visina)
+   
+   ( cond ( (null listaZaPrebacivanje) '() )  
+   	      ( (> visina 0) (izdvojiDiskoveZaPrebacivanje (cdr listaZaPrebacivanje) (- visina 1) ))
+          ( (equal visina 0) ( cons (car listaZaPrebacivanje) (izdvojiDiskoveZaPrebacivanje (cdr listaZaPrebacivanje)  visina)))
+
+   )
+
+)
+
+
+
+
+ (defun izdvojiDiskoveKojiOstaju (lista  visina)
+
+ 	(
+ 		cond ( (> visina 0) (cons (car lista) (izdvojiDiskoveKojiOstaju (cdr lista) (- visina 1))))
+ 		    (t nil)
+
+ 	)
+ )
+ 
+ 
+ 
+ (defun pomeriDiskove (x y x1 y1 visina)
+
+    (
+    	let* ((diskoviOstatak (izdvojiDiskoveKojiOstaju (vratiPolje x y) visina)) (diskoviPrebacivanje (izdvojiDiskoveZaPrebacivanje (vratiPolje x y) visina)))
+         (setf  ( nth y ( nth x (nth 0 stanje))) diskoviOstatak )
+
+         (if (equalp (+(length (vratiPolje x1 y1)) (length diskoviPrebacivanje))  8)  
+
+          ( 
+            progn
+             (setf  ( nth y1 ( nth x1 (nth 0 stanje))) '() )
+              
+              (if (equalp (car (reverse diskoviPrebacivanje)) "X") 
+
+                ( setf (nth 0 (nth 2 stanje)) (+ (caaddr stanje) 1) )
+
+                ( setf (nth 1 (nth 2 stanje)) (+ (car(cdaddr stanje)) 1)  )
+
+              )
+              (proveriCiljnoStanje  stanje  (cadddr stanje) )
+
+
+          ) 
+
+          ;else grana obicno spajanje
+         (setf  ( nth y1 ( nth x1 (nth 0 stanje))) (append (vratiPolje x1 y1) diskoviPrebacivanje) )
+
+          )
+        
+         (if (equalp (cadr stanje) "X")  (setf (nth 1 stanje) "O")  (setf (nth 1 stanje) "X"))
+
+    )
+
+)
+
+
+(defun pomeriStekNaPrazno (x y x1 y1 visina)
+
+ (if (equalp (cadr stanje) (car (vratiPolje x y))) 
+ 	( progn
+    (setf  ( nth y1 ( nth x1 (nth 0 stanje))) (vratiPolje x y))
+    (setf  ( nth y ( nth x (nth 0 stanje))) '() )
+    (if (equalp (cadr stanje) "X")  (setf (nth 1 stanje) "O")  (setf (nth 1 stanje) "X"))
+    
+   )
+   (format t "~a" "Potez nije validan.")
+ )
+)
+
+
+(defun pomeriStekNaStek (x y x1 y1 visina)
+
+	(if (equalp (nth visina (vratiPolje x y)) (cadr stanje) )
+
+		(
+			cond ( (and (< visina (length (vratiPolje x1 y1))) ( <= (+ (- (length (vratiPolje x y)) visina)  (length (vratiPolje x1 y1)) )  8)) (pomeriDiskove x y x1 y1 visina))
+			
+           ( t (format t "~a" "Potez nije validan."))
+		
+		)
+
+		(format t "~a" "Potez nije validan.")
+	)
+
+)
+
+
+(defun proveriValidnoVisinuPriblizavanje (x y x1 y1 visina)
+    
+    ( let* ((potez1  (list  (list x y) (list x1 y1)  visina )))
+    (if    (daLiSePriblizavaNajblizem potez1 (izbaciPotez (zetoniNaTabli (car stanje) 0)  potez1 ))
+    	(  cond ( (and(>=(length (vratiPolje x y)) 1) ( equalp (length (vratiPolje x1 y1)) 0 ) (equalp visina 0) )  (pomeriStekNaPrazno x y x1 y1 visina)   ) 
+    			( (and (>=(length (vratiPolje x y)) 1) (>=(length (vratiPolje x1 y1)) 1)  ) (pomeriStekNaStek x y x1 y1 visina) )
+    	)
+
+    ( format t "~a" "Potez nije validan")
+    	
+    ))
+
+
+)
+
+( defun validanPotez1 ( x y x1 y1 visina) 
+  
+  (let* ((n (cadddr stanje)))
+  ( if( proveraCrnoPolje x y )
+   
+   (
+   cond (  ( and (equalp x1  (- x 1)) (equalp y1 (- y 1)) (> x1 0 ) (>= y1 0) ) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina) ) 
+         ( (and (equalp x1 (- x 1) )  (equalp y1 (+ y 1) ) (> x1 0) (< y1 n))  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina) )
+         ( (and (equalp x1 (+ x 1))  (equalp y1 (- y 1)) (< x1 ( - n 1)) (>= y1 0)  )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina))
+         ( (and (equalp x1 (+ x 1)) (equalp y1 (+ y 1)) (< x1 (- n 1)) (< y1 n) )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina) )
+         ( t "Potez nije validan" ) 
+    
+   )
+
+   (nil)
+  ))
+
+ )
+ 
+ 
+ 
+ 
+ (defun validanPotez (potez)
+  (validanPotez1 (caar potez) (cadar potez) (caadr potez) (cadadr potez) (caddr potez) )
+)
+
+
+(setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
+  ( setf (nth 0 (nth 2 stanje)) 1 )
+  ;(print stanje)
+(validanPotez '( (1 1) (2 2) 0 ))
+;(validanPotez '( (2 2) (1 1) 0 ))
+(validanPotez '( (2 0) (3 1) 0 ))
+(validanPotez '( (2 2) (3 1) 1 ))
+(validanPotez '( (2 2) (3 1) 0 ))
+(validanPotez '( (1 7) (2 6) 0 ))
+(validanPotez '( (2 4) (3 5) 0 ))
+;(trace validanPotez)
+;(trace daLiSePriblizavaNajblizem)
+;( trace pomeriStekNaStek)
+;(trace proveriValidnoVisinuPriblizavanje)
+(validanPotez '( (1 3) (2 2) 0 ))
+(validanPotez '( (4 0) (3 1) 0 ))
+(validanPotez '( (2 2) (3 1) 0 ))
+(validanPotez '( (4 2) (3 1) 0 ))
+(validanPotez '( (3 1) (4 2) 0 ))
+(validanPotez '( (4 4) (3 3) 0 ))
+(validanPotez '( (3 3) (4 2) 1 ))
+;(trace proveriValidnoVisinuPriblizavanje)
+;(trace daLiSePriblizavaNajblizem)
+(trace proveriCiljnoStanje)
+;(trace vratiPolje)
+;(print stanje)
+(validanPotez '( (5 3) (4 2) 0 ))
+;(print stanje)
+;(trace crtajMatricu)
+
+;(validanPotez potez)
+;(print '( '(1 1) '(2 2) 0 ) )
+;(print stanje)
+;(CrtajMatrica (car stanje)  1)
+
+(crtajMatricu (car stanje))
