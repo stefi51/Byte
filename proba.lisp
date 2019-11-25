@@ -62,11 +62,17 @@
 )
 
 
-(defun inicijalnoStanje (tabla velicinaTable)
+ 
+(defun inicijalnoStanje (tabla velicinaTable )
+		
+		(princ "Unesite ko prvi igra, 1-covek 0-kompjuter: ")
+		(setq prviIgrac (read))
 
-		(list tabla "X" '(0 0) velicinaTable)
+		
+		(list tabla ( list "X" prviIgrac) '(0 0) velicinaTable)
 
 	)
+(print (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8 ))
 
 
 
@@ -129,7 +135,7 @@
 
 (defun izbaciPotez (pozicijeZetona potez );mora da se izbaci ta pozicija sa koje se prebacuju zetoni
 
-;(if  (equal (car pozicijeZetona) (car potez)) (cdr pozicijeZetona ) (cons (car pozicijeZetona) (izbaciPotez (cdr pozicijeZetona) potez))  )
+
 
 
 
@@ -460,6 +466,6 @@
 )
 
 
-(crtajMatricu  ( validanPotez '( (2 2) (3 3) 0 ) (validanPotez '( (1 1) (2 2) 0 ) (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8))))
+;(crtajMatricu  ( validanPotez '( (2 2) (3 3) 0 ) (validanPotez '( (1 1) (2 2) 0 ) (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8))))
 ;(trace validanPotez)
  ;( validanPotez '( (2 2) (1 1) 0 ) (validanPotez '( (1 1) (2 2) 0 ) (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8)))
