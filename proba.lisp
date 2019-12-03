@@ -72,7 +72,7 @@
 		(list tabla ( list "X" prviIgrac) '(0 0) velicinaTable)
 
 	)
-(print (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8 ))
+;(print (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8 ))
 
 
 
@@ -323,28 +323,14 @@
     (
     	let* ((diskoviOstatak (izdvojiDiskoveKojiOstaju (vratiPolje x y stanje) visina)) (diskoviPrebacivanje (izdvojiDiskoveZaPrebacivanje (vratiPolje x y stanje) visina))
 
-              (matrica (ubaciUMatricu (car stanje) x y diskoviOstatak 0)  )  (sledeciNaPotezu (if (equalp (cadr stanje) "X")  "O"  "X" ) ) )
-        ; (setf  ( nth y ( nth x (nth 0 stanje))) diskoviOstatak )
+              (matrica (ubaciUMatricu (car stanje) x y diskoviOstatak 0)  )  (sledeciNaPotezu (if (equalp (caadr stanje) "X")  (list "O" (mod (+ (cadadr stanje) 1 ) 2))  (list "X" (mod (+ (cadadr stanje) 1 ) 2)))) )
+      
 
          (if (equalp (+(length (vratiPolje x1 y1 stanje)) (length diskoviPrebacivanje))  8)  
 
           ( 
             progn
-            ; (setf  ( nth y1 ( nth x1 (nth 0 stanje))) '() )
-              
-              ;(if (equalp (car (reverse diskoviPrebacivanje)) "X") 
-
-               ; ( setf (nth 0 (nth 2 stanje)) (+ (caaddr stanje) 1) )
-
-                ;( setf (nth 1 (nth 2 stanje)) (+ (car(cdaddr stanje)) 1)  )
-
-            ;  )
-
-
-             ; (proveriCiljnoStanje  stanje  (cadddr stanje) )
-
-
-             ; (list matrica  sledeciNaPotezu (nth 2 stanje) (nth 3 stanje)) 
+           
              (let* ((matrica2 (ubaciUMatricu matrica x1 y1 '() 0) )  (brojOsvojenih ( if (equalp (car (reverse diskoviPrebacivanje)) "X") (list (+ (nth 0 (nth 2 stanje)) 1) (nth 1 (nth 2 stanje)) )
              ( list (nth 0 (nth 2 stanje))  (+ (nth 1 (nth 2 stanje)) 1) )  )) ) 
 
@@ -355,10 +341,10 @@
 
           ) 
 
-          ;else grana obicno spajanje
+          
          (
 
-          ;setf  ( nth y1 ( nth x1 (nth 0 stanje))) (append (vratiPolje x1 y1) diskoviPrebacivanje)
+        
             list (ubaciUMatricu matrica x1 y1 diskoviPrebacivanje 1)   sledeciNaPotezu (nth 2 stanje) (nth 3 stanje)
 
           )
@@ -370,55 +356,41 @@
 
 )
 
- ;(setq stanje22 (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
- ;( setf  ( nth 1 ( nth 1 (nth 0 stanje22))) (list "B" "X" "B" "X" "B" "X" "B" ) )
-;(trace pomeriDiskove)
-;(print (pomeriDiskove 1 1 2 2 0 (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8)))
-
-;(print (pomeriDiskove 2 0 1 1 0 stanje22))
-;(print (CrtajMatricu (pomeriDiskove 2 0 1 1 0 stanje22) ))
 
 
 
 
 (defun pomeriStekNaPrazno (x y x1 y1 visina stanje)
 
- (if (equalp (cadr stanje) (car (vratiPolje x y stanje))) 
+ (if (equalp (caadr stanje) (car (vratiPolje x y stanje))) 
  	( progn
-   ;; (setf  ( nth y1 ( nth x1 (nth 0 stanje))) (vratiPolje x y stanje))
-    ;(setf  ( nth y ( nth x (nth 0 stanje))) '() )
-    ;(if (equalp (cadr stanje) "X")  (setf (nth 1 stanje) "O")  (setf (nth 1 stanje) "X"))
+   
       (let* ((matrica (ubaciUMatricu (ubaciUMatricu (car stanje) x y '() 0) x1 y1 (vratiPolje x y stanje) 0))
 
-        (sledeciNaPotezu (if (equalp (cadr stanje) "X")  "O"  "X" ) ))
+        (sledeciNaPotezu (if (equalp (caadr stanje) "X")  (list "O" (mod (+ (cadadr stanje) 1 ) 2))  (list "X" (mod (+ (cadadr stanje) 1 ) 2)) ) ))
 
        (list matrica  sledeciNaPotezu (nth 2 stanje) (nth 3 stanje)) 
    )
       )
-   (format t "~a" "Potez nije validan.")
+   stanje
  )
 )
 
-
-;(setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
-;(print stanje)
-
- ;(print (pomeriStekNaPrazno 1 1 2 2 0 (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8)))
 
 
 
 (defun pomeriStekNaStek (x y x1 y1 visina stanje)
 
-	(if (equalp (nth visina (vratiPolje x y stanje)) (cadr stanje) )
+	(if (equalp (nth visina (vratiPolje x y stanje)) (caadr  stanje) )
 
 		(
 			cond ( (and (< visina (length (vratiPolje x1 y1 stanje))) ( <= (+ (- (length (vratiPolje x y stanje)) visina)  (length (vratiPolje x1 y1 stanje)) )  8)) (pomeriDiskove x y x1 y1 visina stanje))
 			
-           ( t (format t "~a" "Potez nije validan."))
+           ( t stanje )
 		
 		)
 
-		(format t "~a" "Potez nije validan.")
+		stanje
 	)
 
 )
@@ -432,7 +404,7 @@
     			( (and (>=(length (vratiPolje x y stanje)) 1) (>=(length (vratiPolje x1 y1 stanje)) 1)  ) (pomeriStekNaStek x y x1 y1 visina stanje) )
     	)
 
-    ( format t "~a" "Potez nije validan")
+    stanje
     	
     ))
 
@@ -449,11 +421,11 @@
          ( (and (equalp x1 (- x 1) )  (equalp y1 (+ y 1) ) (> x1 0) (< y1 n))  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
          ( (and (equalp x1 (+ x 1))  (equalp y1 (- y 1)) (< x1 ( - n 1)) (>= y1 0)  )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje))
          ( (and (equalp x1 (+ x 1)) (equalp y1 (+ y 1)) (< x1 (- n 1)) (< y1 n) )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
-         ( t "Potez nije validan" ) 
+         ( t stanje ) 
     
    )
 
-   (print "Potez nije validan")
+   stanje
   ))
 
  )
@@ -462,10 +434,13 @@
  
  
  (defun validanPotez (potez stanje)
-  (validanPotez1 (caar potez) (cadar potez) (caadr potez) (cadadr potez) (caddr potez) stanje)
+  (validanPotez1 (caar potez) (- (cadar potez) 1) (caadr potez) (-(cadadr potez)1) (caddr potez) stanje)
 )
 
 
-;(crtajMatricu  ( validanPotez '( (2 2) (3 3) 0 ) (validanPotez '( (1 1) (2 2) 0 ) (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8))))
-;(trace validanPotez)
- ;( validanPotez '( (2 2) (1 1) 0 ) (validanPotez '( (1 1) (2 2) 0 ) (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8)))
+ (setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
+ (crtajMatricu stanje)
+
+
+
+
