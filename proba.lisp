@@ -443,4 +443,19 @@
 
 
 
+(defun generisiPoteze (stanje)
+
+    (
+        cons (nadjiDoleOkoloPrazno stanje) (nadjiDaSadrziOkoloPuno stanje)
+    )
+
+)
+
+(defun nadjiDoleOkoloPrazno (stanje)
+
+      (
+         cond ((null (car stanje)) '())
+              ( t ( const) )
+      )
+)
 
