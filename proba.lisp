@@ -360,6 +360,9 @@
 
 
 
+
+
+
 (defun pomeriStekNaPrazno (x y x1 y1 visina stanje)
 
  (if (equalp (caadr stanje) (car (vratiPolje x y stanje))) 
@@ -438,9 +441,93 @@
 )
 
 
- (setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
- (crtajMatricu stanje)
+ 
+ ;(crtajMatricu stanje)
 
 
 
 
+
+ ;(defun vratiPozicijeZetona (stanje  tabla) ;vraca pozicije zetona za moguce poteze
+  ;(append (okoloPrazno stanje tabla) (okoloPuno stanje tabla))
+  ;;prva vraca pozicije zetona koji imaju na dnu odgovarajuci zeton i nemaju susede
+  ;;druga pozicije stekova koji sadrze bar jedan odgovrajuci zeton i imaju suseda
+;)
+
+
+
+ (defun potencijalniMoguciPotezi (stanje tabla indexVrste)
+ 	;;vraca listu polja ((i j) (i j) ..) koja sadrze zetone koje je moguce odigrati ako prodju proveru za validan potez
+ 	;;indexVrste inicijalno je nula
+  (cond ((null (car stanje)) '())
+  	((append (obradiVrstu (caar stanje) stanje tabla indexVrste 0 ) (potencijalniMoguciPotezi (cons (cdar stanje) (cdr stanje)) tabla (1+ indexVrste))))
+
+  	)
+
+  	
+
+)
+
+ (defun obradiVrstu (vrsta stanje tabla indexVrste indexKolone)
+ 
+  (cond ((null  vrsta) '())
+  	( t (append (proveriPolje (car vrsta) stanje tabla indexVrste indexKolone) (obradiVrstu (cdr vrsta) stanje tabla indexVrste (1+ indexKolone)) ))
+
+  	)
+
+ )
+
+(defun proveriPolje ( stek stanje tabla indexVrste indexKolone)
+
+	  (cond ;( (not(equalp (car stek) (caadr stanje ))) '())
+  	( (and (equalp (car stek) (caadr stanje )) (proveriOkoloDaLiJePrazno indexVrste indexKolone tabla))  (list(list indexVrste indexKolone)))
+  	;;ako je skroz dole odgovrajuci i oko njega je prazno onda je okej taj
+  	( (and (postojiOdgovarajuciZeton stek (caadr stanje )) (not(proveriOkoloDaLiJePrazno indexVrste indexKolone tabla)) )  (list (list indexVrste indexKolone)))
+  	;;ima u steku zeton igraca koji je na potezu i oko njega je stek
+  	(t '())
+  	)
+
+
+	)
+
+(defun proveriOkoloDaLiJePrazno (indexVrste indexKolone tabla)
+
+	 (cond ((and(equalp indexVrste 0) (equalp indexKolone 0)) (proveraOkolo (list (list 1 1)) tabla))
+  	(  (and(equalp indexVrste (1-(length tabla))) (equalp indexKolone (1-(length tabla)))) (proveraOkolo (list (list  (- (length tabla ) 2) (- (length tabla ) 2))) tabla))
+  		
+  		((equalp indexVrste 0) (proveraOkolo (list (list  1  (- indexKolone 1))    (list  1  (+ indexKolone 1))  ) tabla)  )
+  		
+  		((equalp indexVrste (1-(length tabla)) )  (proveraOkolo (list (list  (-(length tabla) 2)  (- indexKolone 1))    (list  (-(length tabla) 2)   (+ indexKolone 1))  ) tabla)  )
+  		
+  		((equalp indexKolone 0) (proveraOkolo (list (list  (- indexVrste 1)  1)    (list  (+ indexVrste 1)  1)  ) tabla)  )
+
+  		((equalp indexKolone (1-(length tabla)) ) (proveraOkolo (list (list  (- indexVrste 1) (-(length tabla) 2)  )    (list  (+ indexVrste 1)  (-(length tabla) 2) )  ) tabla)  )
+
+  		(t (proveraOkolo (list (list  (- indexVrste 1) (- indexKolone 1)  )    (list  (- indexVrste 1)  (+ indexKolone 1) )  
+  		(list  (+ indexVrste 1)  (- indexKolone 1) ) (list  (+ indexVrste 1)  (+ indexKolone 1) ) ) tabla)   )
+
+
+  	)
+
+	)
+
+(defun proveraOkolo (listaSuseda tabla)
+	(cond ((null listaSuseda) t  )
+		( (equalp (length ( nth (cadar listaSuseda) ( nth (caar listaSuseda ) tabla)) ) 0) (proveraOkolo (cdr listaSuseda) tabla) )
+		(t '()) 
+	)
+
+ )
+
+(defun postojiOdgovarajuciZeton (stek iksIliOks)
+	
+	(cond ((null stek) '()  )
+		( (equalp (car stek) iksIliOks) t )
+		(t  (postojiOdgovarajuciZeton (cdr stek) iksIliOks)) 
+	)
+)
+(setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
+;(trace potencijalniMoguciPotezi)
+;(trace obradiVrstu)
+;(trace proveriPolje)
+(print (potencijalniMoguciPotezi stanje (car stanje) 0))
