@@ -375,7 +375,7 @@
        (list matrica  sledeciNaPotezu (nth 2 stanje) (nth 3 stanje)) 
    )
       )
-   stanje
+   nil
  )
 )
 
@@ -389,11 +389,11 @@
 		(
 			cond ( (and (< visina (length (vratiPolje x1 y1 stanje))) ( <= (+ (- (length (vratiPolje x y stanje)) visina)  (length (vratiPolje x1 y1 stanje)) )  8)) (pomeriDiskove x y x1 y1 visina stanje))
 			
-           ( t stanje )
+           ( t nil )
 		
 		)
 
-		stanje
+		nil
 	)
 
 )
@@ -407,7 +407,7 @@
     			( (and (>=(length (vratiPolje x y stanje)) 1) (>=(length (vratiPolje x1 y1 stanje)) 1)  ) (pomeriStekNaStek x y x1 y1 visina stanje) )
     	)
 
-    stanje
+  nil
     	
     ))
 
@@ -420,24 +420,23 @@
   ( if( proveraCrnoPolje x y )
    
    (
-   cond (  ( and (equalp x1  (- x 1)) (equalp y1 (- y 1)) (> x1 0 ) (>= y1 0) ) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) ) 
-         ( (and (equalp x1 (- x 1) )  (equalp y1 (+ y 1) ) (> x1 0) (< y1 n))  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
-         ( (and (equalp x1 (+ x 1))  (equalp y1 (- y 1)) (< x1 ( - n 1)) (>= y1 0)  )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje))
-         ( (and (equalp x1 (+ x 1)) (equalp y1 (+ y 1)) (< x1 (- n 1)) (< y1 n) )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
-         ( t stanje ) 
+   cond (  ( and (equalp x1  (- x 1)) (equalp y1 (- y 1)) (>= x1 0 ) (>= y1 0) ) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje))
+         ( (and (equalp x1 (- x 1) )  (equalp y1 (+ y 1) ) (>= x1 0) (< y1 n)) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
+         ( (and (equalp x1 (+ x 1))  (equalp y1 (- y 1)) (< x1  n ) (>= y1 0)  ) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje))
+         ( (and (equalp x1 (+ x 1)) (equalp y1 (+ y 1)) (< x1  n) (< y1 n) )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
+         ( t nil ) 
     
    )
 
-   stanje
+   nil
   ))
 
  )
  
  
  
- 
  (defun validanPotez (potez stanje)
-  (validanPotez1 (caar potez) (- (cadar potez) 1) (caadr potez) (-(cadadr potez)1) (caddr potez) stanje)
+  (validanPotez1 (caar potez)  (cadar potez)  (caadr potez) (cadadr potez) (caddr potez) stanje)
 )
 
 
@@ -446,7 +445,76 @@
 
 
 
+(defun generisiMogucaStanja (stanje)
 
+  ( vratiMogucaStanja ( potencijalniMoguciPotezi stanje (car stanje) 0) stanje )
+
+)
+
+(defun vratiMogucaStanja (listaCvorova stanje)
+
+(  
+  cond ((null listaCvorova) '())
+       (t ( append (generisiStanjaZaToPolje (car listaCvorova) stanje) (vratiMogucaStanja (cdr listaCvorova) stanje) ))
+)
+
+)
+
+(defun generisiStanjaZaToPolje (polje stanje) 
+
+      (let* (  (visinaPoljaSaKogSePomera  (length (vratiPolje (car polje) (cadr polje) stanje )) )  (x (car polje)) (y (cadr polje))
+
+      		(visinaGoreLevo (length (vratiPolje (- x 1) (- y 1)  stanje ))  )
+      		(visinaGoreDesno (length (vratiPolje (- x 1) (+ y 1)  stanje ))  )
+      		(visinaDoleLevo (length (vratiPolje (+ x 1) (- y 1)  stanje ))  )
+      		(visinaDoleDesno (length (vratiPolje (+ x 1) (+ y 1)  stanje ))  )
+      	)
+      	
+
+
+
+          (append (generisiStanja1 x y (- x 1) (- y 1) 0 visinaGoreLevo visinaPoljaSaKogSePomera stanje ) 
+          	(generisiStanja1 x y (- x 1) (+ y 1) 0 visinaGoreDesno visinaPoljaSaKogSePomera  stanje ) 
+            (generisiStanja1 x y (+ x 1) (- y 1) 0 visinaDoleLevo visinaPoljaSaKogSePomera stanje ) 
+            (generisiStanja1 x y (+ x 1) (+ y 1) 0 visinaDoleDesno visinaPoljaSaKogSePomera stanje )  
+
+            )
+      )
+)
+
+
+
+(defun generisiStanja1 (x y x1 y1 trenutnaVisina visinaNaKojuSeIde visinaSaKojePomera  stanje)
+
+  ( cond (  (or (>= trenutnaVisina visinaNaKojuSeIde )  (>= trenutnaVisina visinaSaKojePomera) ) '() )
+         (t 
+
+
+      (let* (  (vracenoStanje  (validanPotez1 x y x1 y1 trenutnaVisina stanje) )  
+
+      		
+      	)
+      	
+
+      (if (equalp vracenoStanje nil) ( append  vracenoStanje (generisiStanja1 x y x1 y1 ( + trenutnaVisina 1) visinaNaKojuSeIde visinaSaKojePomera stanje) ) 
+
+      	( cons  vracenoStanje (generisiStanja1 x y x1 y1 ( + trenutnaVisina 1) visinaNaKojuSeIde visinaSaKojePomera stanje) )
+       )
+
+          
+      )
+
+
+
+
+
+
+          )
+
+  )
+)
+
+;(defun vratiPolje (x y stanje)
 
  ;(defun vratiPozicijeZetona (stanje  tabla) ;vraca pozicije zetona za moguce poteze
   ;(append (okoloPrazno stanje tabla) (okoloPuno stanje tabla))
@@ -530,4 +598,10 @@
 ;(trace potencijalniMoguciPotezi)
 ;(trace obradiVrstu)
 ;(trace proveriPolje)
-(print (potencijalniMoguciPotezi stanje (car stanje) 0))
+;(crtajMatricu stanje)
+;(print (potencijalniMoguciPotezi stanje (car stanje) 0))
+;(trace  generisiStanja1)
+;(trace  generisiStanjaZaToPolje)
+;(trace vratiMogucaStanja)
+;(trace validanPotez1)
+(crtajMatricu (cadr(cddddr(cddddr(cddddr(cddddr(cddddr(generisiMogucaStanja stanje ))))))))
