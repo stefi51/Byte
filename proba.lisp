@@ -447,7 +447,6 @@
 
 (defun generisiMogucaStanja (stanje)
 
-  ( vratiMogucaStanja ( potencijalniMoguciPotezi stanje (car stanje) 0) stanje )
 
 )
 
