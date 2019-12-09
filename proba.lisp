@@ -149,7 +149,7 @@
 
 
 
-(setq potez '( (1 1) ( 2 0 ) 0 ) )
+;(setq potez '( (1 1) ( 2 0 ) 0 ) )
 
 
 
@@ -360,6 +360,9 @@
 
 
 
+
+
+
 (defun pomeriStekNaPrazno (x y x1 y1 visina stanje)
 
  (if (equalp (caadr stanje) (car (vratiPolje x y stanje))) 
@@ -372,7 +375,7 @@
        (list matrica  sledeciNaPotezu (nth 2 stanje) (nth 3 stanje)) 
    )
       )
-   stanje
+   nil
  )
 )
 
@@ -386,11 +389,11 @@
 		(
 			cond ( (and (< visina (length (vratiPolje x1 y1 stanje))) ( <= (+ (- (length (vratiPolje x y stanje)) visina)  (length (vratiPolje x1 y1 stanje)) )  8)) (pomeriDiskove x y x1 y1 visina stanje))
 			
-           ( t stanje )
+           ( t nil )
 		
 		)
 
-		stanje
+		nil
 	)
 
 )
@@ -404,7 +407,7 @@
     			( (and (>=(length (vratiPolje x y stanje)) 1) (>=(length (vratiPolje x1 y1 stanje)) 1)  ) (pomeriStekNaStek x y x1 y1 visina stanje) )
     	)
 
-    stanje
+  nil
     	
     ))
 
@@ -417,45 +420,343 @@
   ( if( proveraCrnoPolje x y )
    
    (
-   cond (  ( and (equalp x1  (- x 1)) (equalp y1 (- y 1)) (> x1 0 ) (>= y1 0) ) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) ) 
-         ( (and (equalp x1 (- x 1) )  (equalp y1 (+ y 1) ) (> x1 0) (< y1 n))  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
-         ( (and (equalp x1 (+ x 1))  (equalp y1 (- y 1)) (< x1 ( - n 1)) (>= y1 0)  )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje))
-         ( (and (equalp x1 (+ x 1)) (equalp y1 (+ y 1)) (< x1 (- n 1)) (< y1 n) )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
-         ( t stanje ) 
+   cond (  ( and (equalp x1  (- x 1)) (equalp y1 (- y 1)) (>= x1 0 ) (>= y1 0) ) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje))
+         ( (and (equalp x1 (- x 1) )  (equalp y1 (+ y 1) ) (>= x1 0) (< y1 n)) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
+         ( (and (equalp x1 (+ x 1))  (equalp y1 (- y 1)) (< x1  n ) (>= y1 0)  ) (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje))
+         ( (and (equalp x1 (+ x 1)) (equalp y1 (+ y 1)) (< x1  n) (< y1 n) )  (proveriValidnoVisinuPriblizavanje x y x1 y1 visina stanje) )
+         ( t nil ) 
     
    )
 
-   stanje
+   nil
   ))
 
  )
  
  
  
- 
  (defun validanPotez (potez stanje)
-  (validanPotez1 (caar potez) (- (cadar potez) 1) (caadr potez) (-(cadadr potez)1) (caddr potez) stanje)
+  (validanPotez1 (caar potez)  (cadar potez)  (caadr potez) (cadadr potez) (caddr potez) stanje)
 )
 
 
- (setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
- (crtajMatricu stanje)
+ 
+ ;(crtajMatricu stanje)
 
 
 
-(defun generisiPoteze (stanje)
+(defun generisiMogucaStanja (stanje)
 
-    (
-        cons (nadjiDoleOkoloPrazno stanje) (nadjiDaSadrziOkoloPuno stanje)
-    )
+  ( vratiMogucaStanja ( potencijalniMoguciPotezi stanje (car stanje) 0) stanje )
 
 )
 
-(defun nadjiDoleOkoloPrazno (stanje)
+(defun vratiMogucaStanja (listaCvorova stanje)
 
-      (
-         cond ((null (car stanje)) '())
-              ( t ( const) )
+(  
+  cond ((null listaCvorova) '())
+       (t ( append (generisiStanjaZaToPolje (car listaCvorova) stanje) (vratiMogucaStanja (cdr listaCvorova) stanje) ))
+)
+
+)
+
+(defun generisiStanjaZaToPolje (polje stanje) 
+
+      (let* (  (visinaPoljaSaKogSePomera  (length (vratiPolje (car polje) (cadr polje) stanje )) )  (x (car polje)) (y (cadr polje))
+
+      		(visinaGoreLevo (length (vratiPolje (- x 1) (- y 1)  stanje ))  )
+      		(visinaGoreDesno (length (vratiPolje (- x 1) (+ y 1)  stanje ))  )
+      		(visinaDoleLevo (length (vratiPolje (+ x 1) (- y 1)  stanje ))  )
+      		(visinaDoleDesno (length (vratiPolje (+ x 1) (+ y 1)  stanje ))  )
+      	)
+      	
+
+
+
+          (append (generisiStanja1 x y (- x 1) (- y 1) 0 visinaGoreLevo visinaPoljaSaKogSePomera stanje ) 
+          	(generisiStanja1 x y (- x 1) (+ y 1) 0 visinaGoreDesno visinaPoljaSaKogSePomera  stanje ) 
+            (generisiStanja1 x y (+ x 1) (- y 1) 0 visinaDoleLevo visinaPoljaSaKogSePomera stanje ) 
+            (generisiStanja1 x y (+ x 1) (+ y 1) 0 visinaDoleDesno visinaPoljaSaKogSePomera stanje )  
+
+            )
       )
 )
 
+
+
+(defun generisiStanja1 (x y x1 y1 trenutnaVisina visinaNaKojuSeIde visinaSaKojePomera  stanje)
+
+  ( cond (  (or (>= trenutnaVisina visinaNaKojuSeIde )  (>= trenutnaVisina visinaSaKojePomera) ) '() )
+         (t 
+
+
+      (let* (  (vracenoStanje  (validanPotez1 x y x1 y1 trenutnaVisina stanje) )  
+
+      		
+      	)
+      	
+
+      (if (equalp vracenoStanje nil) ( append  vracenoStanje (generisiStanja1 x y x1 y1 ( + trenutnaVisina 1) visinaNaKojuSeIde visinaSaKojePomera stanje) ) 
+
+      	( cons  vracenoStanje (generisiStanja1 x y x1 y1 ( + trenutnaVisina 1) visinaNaKojuSeIde visinaSaKojePomera stanje) )
+       )
+
+          
+      )
+
+
+          )
+
+  )
+)
+
+
+ (defun potencijalniMoguciPotezi (stanje tabla indexVrste)
+ 	;;vraca listu polja ((i j) (i j) ..) koja sadrze zetone koje je moguce odigrati ako prodju proveru za validan potez
+ 	;;indexVrste inicijalno je nula
+  (cond ((null (car stanje)) '())
+  	((append (obradiVrstu (caar stanje) stanje tabla indexVrste 0 ) (potencijalniMoguciPotezi (cons (cdar stanje) (cdr stanje)) tabla (1+ indexVrste))))
+
+  	)
+
+  	
+
+)
+
+ (defun obradiVrstu (vrsta stanje tabla indexVrste indexKolone)
+ 
+  (cond ((null  vrsta) '())
+  	( t (append (proveriPolje (car vrsta) stanje tabla indexVrste indexKolone) (obradiVrstu (cdr vrsta) stanje tabla indexVrste (1+ indexKolone)) ))
+
+  	)
+
+ )
+
+(defun proveriPolje ( stek stanje tabla indexVrste indexKolone)
+
+	  (cond ;( (not(equalp (car stek) (caadr stanje ))) '())
+  	( (and (equalp (car stek) (caadr stanje )) (proveriOkoloDaLiJePrazno indexVrste indexKolone tabla))  (list(list indexVrste indexKolone)))
+  	;;ako je skroz dole odgovrajuci i oko njega je prazno onda je okej taj
+  	( (and (postojiOdgovarajuciZeton stek (caadr stanje )) (not(proveriOkoloDaLiJePrazno indexVrste indexKolone tabla)) )  (list (list indexVrste indexKolone)))
+  	;;ima u steku zeton igraca koji je na potezu i oko njega je stek
+  	(t '())
+  	)
+
+
+	)
+
+(defun proveriOkoloDaLiJePrazno (indexVrste indexKolone tabla)
+
+	 (cond ((and(equalp indexVrste 0) (equalp indexKolone 0)) (proveraOkolo (list (list 1 1)) tabla))
+  	(  (and(equalp indexVrste (1-(length tabla))) (equalp indexKolone (1-(length tabla)))) (proveraOkolo (list (list  (- (length tabla ) 2) (- (length tabla ) 2))) tabla))
+  		
+  		((equalp indexVrste 0) (proveraOkolo (list (list  1  (- indexKolone 1))    (list  1  (+ indexKolone 1))  ) tabla)  )
+  		
+  		((equalp indexVrste (1-(length tabla)) )  (proveraOkolo (list (list  (-(length tabla) 2)  (- indexKolone 1))    (list  (-(length tabla) 2)   (+ indexKolone 1))  ) tabla)  )
+  		
+  		((equalp indexKolone 0) (proveraOkolo (list (list  (- indexVrste 1)  1)    (list  (+ indexVrste 1)  1)  ) tabla)  )
+
+  		((equalp indexKolone (1-(length tabla)) ) (proveraOkolo (list (list  (- indexVrste 1) (-(length tabla) 2)  )    (list  (+ indexVrste 1)  (-(length tabla) 2) )  ) tabla)  )
+
+  		(t (proveraOkolo (list (list  (- indexVrste 1) (- indexKolone 1)  )    (list  (- indexVrste 1)  (+ indexKolone 1) )  
+  		(list  (+ indexVrste 1)  (- indexKolone 1) ) (list  (+ indexVrste 1)  (+ indexKolone 1) ) ) tabla)   )
+
+
+  	)
+
+	)
+
+(defun proveraOkolo (listaSuseda tabla)
+	(cond ((null listaSuseda) t  )
+		( (equalp (length ( nth (cadar listaSuseda) ( nth (caar listaSuseda ) tabla)) ) 0) (proveraOkolo (cdr listaSuseda) tabla) )
+		(t '()) 
+	)
+
+ )
+
+(defun postojiOdgovarajuciZeton (stek iksIliOks)
+	
+	(cond ((null stek) '()  )
+		( (equalp (car stek) iksIliOks) t )
+		(t  (postojiOdgovarajuciZeton (cdr stek) iksIliOks)) 
+	)
+)
+;(trace potencijalniMoguciPotezi)
+;(trace obradiVrstu)
+;(trace proveriPolje)
+;(crtajMatricu stanje)
+;(print (potencijalniMoguciPotezi stanje (car stanje) 0))
+;(trace  generisiStanja1)
+;(trace  generisiStanjaZaToPolje)
+;(trace vratiMogucaStanja)
+;(trace validanPotez1)
+;(crtajMatricu (cadr(cddddr(cddddr(cddddr(cddddr(cddddr(generisiMogucaStanja stanje ))))))))
+
+(defun unesiPotez (stanje)
+	(progn (format t "~% Unesite potez :")
+
+		(read-char ) 
+		(read-char ) 
+		(read-char ) 
+
+
+	      		(let* ((potez1x  (read) ) (read-char )  (potez1y  (read) )  )   
+	      		(read-char )
+	      		(read-char )
+	      		(read-char )
+	      		(read-char )
+
+	      	(let*  (  (potez2x  (read) )   (read-char )  (potez2y  (read) )  )
+
+	      				(read-char )
+
+
+
+	       			(let* ((visina (read)))  
+	       					(read-char )
+	       					(read-line)
+	       				;(print (list potez1x potez1y))
+	       		;(print (list potez2x  potez2y ))
+	       			;(print visina)
+	       			;(print (proveriDaLiUnosKorektan  potez1x potez1y ))
+	       			;(print (proveriDaLiUnosKorektan  potez2x potez2y ))
+
+	       			(let* ((polje1 (proveriDaLiUnosKorektan potez1x potez1y)) (polje2 (proveriDaLiUnosKorektan potez2x potez2y))    )
+
+	       					(if (or (equalp polje1 nil) (equalp polje2 nil)) 
+
+	       						(progn
+	       						 (format t "Uneli ste nevalidan potez" )
+	       						 (unesiPotez stanje)
+	       						 )
+
+	       						(validanPotez (list polje1 polje2 visina) stanje)
+
+	       					  )
+
+
+	       				)
+
+	       				)
+
+	       		)
+	       	 )
+)
+)
+
+
+
+(defun proveriDaLiUnosKorektan (poljex poljey)
+ 	
+ 	(cond ( (string= poljex  "A") ( list 0  (-  poljey 1) ))
+ 		  ( (string= poljex "B") ( list 1  (-  poljey 1)  ))
+ 		  ( (string= poljex "C")  ( list 2  (-  poljey 1) ))
+ 		  ( (string= poljex "D") ( list 3 (-  poljey 1) ))
+ 		  ( (string= poljex "E") ( list 4 (-  poljey 1) ))
+ 		  ( (string= poljex "F") ( list 5 (-  poljey 1) ))
+ 		  ( (string= poljex "G") ( list 6 (-  poljey 1) ))
+ 		  ( (string= poljex "H") ( list 7 (-  poljey 1) ))
+ 		  ( (string= poljex "I") ( list 8 (-  poljey 1) ))
+ 		  ( (string= poljex "J") ( list 9 (-  poljey 1) ))
+ 		  (t nil)
+ 		  )
+)
+
+;(proveriDaLiUnosKorektan (list A 5))
+;(setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
+
+;(unesiPotez stanje)
+
+(defun unetiVelicinuTable () 
+	(
+		progn (format t "~% Unesite velicinaTable :")
+		(let* ((velicinaTable (read))    )
+         (inicijalnoStanje (inicijalizuj (praviTablu velicinaTable velicinaTable)  ) velicinaTable)
+
+		)
+
+	)
+
+)
+
+
+
+
+(defun main ()
+(let* ((stanje (unetiVelicinuTable) )     )
+	    ( crtajMatricu stanje)
+		(igraj  stanje  (car (reverse stanje)) )
+
+)
+)
+
+
+
+
+(defun odigrajIProveriValidan (stanje)
+
+	(let* ((novoStanje (unesiPotez stanje) ))
+
+		(if (equalp novoStanje nil)
+
+			( progn (format t "Uneli ste nevalidan potez" ) stanje )
+			 novoStanje
+
+
+		)
+	)
+)
+
+
+
+
+
+
+(defun igraj (stanje velicinaTable)
+
+	( 		cond ( (not (equal (proveriCiljnoStanje stanje velicinaTable) nil )) (format t "Pobednik je: ~a" (proveriCiljnoStanje stanje velicinaTable) ) )
+	
+	( t 
+
+	(if (equalp(cadadr stanje) 0)
+
+		(
+			progn 
+			(format t "Igra racunar- sad je covek")
+
+			(let* ((stanjeNovo (odigrajIProveriValidan stanje)))
+
+				(crtajMatricu stanjeNovo)
+				(igraj stanjeNovo velicinaTable)
+
+				)
+
+
+			
+		)
+
+		 (
+
+			progn 
+			(format t "Igra covek")
+
+             (let* ((stanjeNovo (odigrajIProveriValidan stanje)))
+
+				(crtajMatricu stanjeNovo)
+				(igraj stanjeNovo velicinaTable)
+
+			)
+		
+
+
+		 )	
+	)
+
+     )
+
+	)
+)
+
+ ;proveriCiljnoStanje (stanje velicinaTable)
+;(trace main)
+(main )
