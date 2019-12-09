@@ -447,6 +447,7 @@
 
 (defun generisiMogucaStanja (stanje)
 
+ ( vratiMogucaStanja ( potencijalniMoguciPotezi stanje (car stanje) 0) stanje )
 
 )
 
@@ -589,7 +590,9 @@
 ;(trace  generisiStanjaZaToPolje)
 ;(trace vratiMogucaStanja)
 ;(trace validanPotez1)
-;(crtajMatricu (cadr(cddddr(cddddr(cddddr(cddddr(cddddr(generisiMogucaStanja stanje ))))))))
+;(crtajMatricu (cadr(cddddr(cddddr(cddddr(cddddr(cddddr(generisiMogucaStanja (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) ))))))))
+;(print (generisiMogucaStanja (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) ) )
+
 
 (defun unesiPotez (stanje)
 	(progn (format t "~% Unesite potez :")
