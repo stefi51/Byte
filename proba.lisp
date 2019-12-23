@@ -460,27 +460,43 @@
 
 )
 
+
+
+
 (defun generisiStanjaZaToPolje (polje stanje) 
 
       (let* (  (visinaPoljaSaKogSePomera  (length (vratiPolje (car polje) (cadr polje) stanje )) )  (x (car polje)) (y (cadr polje))
+      		(n (cadddr stanje))
 
-      		(visinaGoreLevo (length (vratiPolje (- x 1) (- y 1)  stanje ))  )
-      		(visinaGoreDesno (length (vratiPolje (- x 1) (+ y 1)  stanje ))  )
-      		(visinaDoleLevo (length (vratiPolje (+ x 1) (- y 1)  stanje ))  )
-      		(visinaDoleDesno (length (vratiPolje (+ x 1) (+ y 1)  stanje ))  )
       	)
-      	
+          (append 
+          	(validnaPozicijaNaKojuMozeDaSePremesti  x y (- x 1) (- y 1) n visinaPoljaSaKogSePomera stanje )
+          	(validnaPozicijaNaKojuMozeDaSePremesti  x y (- x 1) (+ y 1) n visinaPoljaSaKogSePomera stanje )
+          	(validnaPozicijaNaKojuMozeDaSePremesti  x y (+ x 1) (- y 1)  n visinaPoljaSaKogSePomera stanje )
+          	(validnaPozicijaNaKojuMozeDaSePremesti  x y (+ x 1) (+ y 1)   n visinaPoljaSaKogSePomera stanje )
+          )
 
 
-
-          (append (generisiStanja1 x y (- x 1) (- y 1) 0 visinaGoreLevo visinaPoljaSaKogSePomera stanje ) 
-          	(generisiStanja1 x y (- x 1) (+ y 1) 0 visinaGoreDesno visinaPoljaSaKogSePomera  stanje ) 
-            (generisiStanja1 x y (+ x 1) (- y 1) 0 visinaDoleLevo visinaPoljaSaKogSePomera stanje ) 
-            (generisiStanja1 x y (+ x 1) (+ y 1) 0 visinaDoleDesno visinaPoljaSaKogSePomera stanje )  
-
-            )
       )
 )
+
+
+
+;; pomocna fja
+(defun validnaPozicijaNaKojuMozeDaSePremesti (x y x1 y1 n visinaPoljaSaKogSePomera stanje)
+
+		(if (and (> x1 -1) (< x1 n)  (> y1 -1) (< y1 n) ) 
+			(generisiStanja1 x y x1 y1 0 (length (vratiPolje x1 y1 stanje)) visinaPoljaSaKogSePomera stanje)
+			'()
+
+		)
+	
+)
+
+
+
+
+
 
 
 
@@ -592,6 +608,18 @@
 ;(trace validanPotez1)
 ;(crtajMatricu (cadr(cddddr(cddddr(cddddr(cddddr(cddddr(generisiMogucaStanja (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) ))))))))
 ;(print (generisiMogucaStanja (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) ) )
+
+;(trace generisiMogucaStanja)
+;(trace generisiStanja1)
+;(trace vratiMogucaStanja)
+;(trace generisiStanjaZaToPolje)
+;(trace vratiPolje)
+
+;(main )
+
+
+
+
 
 
 (defun unesiPotez (stanje)
@@ -726,7 +754,7 @@
 			progn 
 			(format t "Igra racunar- sad je covek")
 
-			(let* ((stanjeNovo (odigrajIProveriValidan stanje)))
+			(let* ((stanjeNovo (cadr (alfaBetaOdsecanje stanje 2 -50 50 t 2))))
 
 				(crtajMatricu stanjeNovo)
 				(igraj stanjeNovo velicinaTable)
@@ -761,4 +789,84 @@
 
  ;proveriCiljnoStanje (stanje velicinaTable)
 ;(trace main)
-(main )
+;(main )
+
+
+
+
+;radi za samo za parni koreficijent dubine(setq (nth 0 (nth 2 stanje)) 1)
+(defun heuristikaStanja (stanje) (
+let* ((naPotezu (caadr stanje) )  (brojStekovaX (caaddr stanje)) (brojStekovaO (car(cdaddr stanje))))
+	 (if ( equal naPotezu "X")
+	  (cond ( (> brojStekovaX brojStekovaO) 10 )
+	  		( (< brojStekovaX brojStekovaO) -10 )
+	  		(t 0)
+	  ) 
+
+	  (cond ( (> brojStekovaO brojStekovaX) 10 )
+	  		( (< brojStekovaO brojStekovaX) -10 )
+	  		(t 0)
+	  ) )
+
+
+))
+
+
+(defun alfaBetaOdsecanje (stanje dubina alfa beta maxIgrac maxDubina)
+
+	(
+		cond ((equalp dubina 0) (list (heuristikaStanja stanje) stanje ))
+			(t (if (equal maxIgrac t)
+
+				
+					(obradiPotomkeMax (generisiMogucaStanja stanje) (- dubina 1) alfa beta (not maxIgrac) maxDubina nil )
+			
+					(progn 
+						
+						(obradiPotomkeMin (generisiMogucaStanja stanje) (- dubina 1) alfa beta (not maxIgrac) maxDubina nil)  )
+
+				
+
+			 ))
+	)
+
+)
+
+
+
+(defun obradiPotomkeMax (potomci dubina alfa beta igrac maxDubina najboljeStanje)
+	(cond ((null potomci) (list alfa najboljeStanje)) 
+		  (t (let* ((novoAlfaStanje (alfaBetaOdsecanje (car potomci) dubina alfa beta igrac maxDubina)) (novoalfa (car novoAlfaStanje))  (novoStanje (cadr novoAlfaStanje))  )
+
+		  	(if (< alfa novoalfa) (if (< beta novoalfa) ( progn (print "isekao") (list novoalfa novoStanje))  (obradiPotomkeMax (cdr potomci) dubina novoalfa beta igrac maxDubina novoStanje))
+
+		  		(progn (obradiPotomkeMax (cdr potomci) dubina alfa beta igrac maxDubina najboljeStanje))
+		  	)
+		  	))
+
+	)
+
+)
+
+
+(defun obradiPotomkeMin (potomci dubina alfa beta igrac maxDubina najboljeStanje)
+	(cond ((null potomci) (list beta najboljeStanje) ) 
+		  (t (let* ((novoBetaStanije (alfaBetaOdsecanje (car potomci) dubina alfa beta igrac maxDubina)) (novobeta (car novoBetaStanije)) (novoStanje (cadr novoBetaStanije)) )
+
+		  	(if (< novobeta beta) (if (< novobeta alfa) (list novobeta novoStanje) (obradiPotomkeMin (cdr potomci) dubina alfa novobeta igrac maxDubina novoStanje))
+
+		  		(progn  (obradiPotomkeMin (cdr potomci) dubina alfa beta igrac maxDubina najboljeStanje))
+		  	)
+		  	))
+
+	)
+
+)
+
+
+
+;(print (heuristikaStanja stanje ))
+;(trace obradiPotomkeMin)
+;(trace alfaBetaOdsecanje)
+(main)
+
