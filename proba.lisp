@@ -752,17 +752,14 @@
 
 		(
 			progn 
-			(format t "Igra racunar- sad je covek")
+			(format t "Igra racunar- tj vrti se minMax sada")
 
-			(let* ((stanjeNovo (cadr (alfaBetaOdsecanje stanje 2 -50 50 t 2))))
+			(let* ((stanjeNovo (car (MaxPotez stanje -50 50 2 ))));;da se proveri sta treba za alfu i za betu inicijalno
 
 				(crtajMatricu stanjeNovo)
 				(igraj stanjeNovo velicinaTable)
 
 				)
-
-
-			
 		)
 
 		 (
@@ -812,61 +809,64 @@ let* ((naPotezu (caadr stanje) )  (brojStekovaX (caaddr stanje)) (brojStekovaO (
 ))
 
 
-(defun alfaBetaOdsecanje (stanje dubina alfa beta maxIgrac maxDubina)
 
-	(
-		cond ((equalp dubina 0) (list (heuristikaStanja stanje) stanje ))
-			(t (if (equal maxIgrac t)
+(defun MaxPotez (stanje alfa beta dubina )
+ 	(let* ((novaStanja  (generisiMogucaStanja stanje)) (V -50));;-50 simulira -beskonacno
 
-				
-					(obradiPotomkeMax (generisiMogucaStanja stanje) (- dubina 1) alfa beta (not maxIgrac) maxDubina nil )
+ 			(cond ( (or (zerop dubina) (null novaStanja)) (list stanje (heuristikaStanja stanje)) )
+ 					
+ 					
+
+ 					(t (MaxPomPetlja V novaStanja alfa beta dubina nil )
+
+ 			)
+ 	) )
+ )
+
+(defun MaxPomPetlja ( V novaStanja alfa beta dubina stanjeHeuristikaNajbolje)
+			(if (null novaStanja) stanjeHeuristikaNajbolje
+			(let* ((V1 (cadr(MinPotez (car novaStanja) alfa beta (1- dubina ) )))  )
 			
-					(progn 
-						
-						(obradiPotomkeMin (generisiMogucaStanja stanje) (- dubina 1) alfa beta (not maxIgrac) maxDubina nil)  )
-
-				
-
-			 ))
-	)
-
-)
-
-
-
-(defun obradiPotomkeMax (potomci dubina alfa beta igrac maxDubina najboljeStanje)
-	(cond ((null potomci) (list alfa najboljeStanje)) 
-		  (t (let* ((novoAlfaStanje (alfaBetaOdsecanje (car potomci) dubina alfa beta igrac maxDubina)) (novoalfa (car novoAlfaStanje))  (novoStanje (cadr novoAlfaStanje))  )
-
-		  	(if (< alfa novoalfa) (if (< beta novoalfa) ( progn (print "isekao") (list novoalfa novoStanje))  (obradiPotomkeMax (cdr potomci) dubina novoalfa beta igrac maxDubina novoStanje))
-
-		  		(progn (obradiPotomkeMax (cdr potomci) dubina alfa beta igrac maxDubina najboljeStanje))
-		  	)
-		  	))
+		  	(if (>= V1 beta ) (list (car novaStanja) (heuristikaStanja (car novaStanja)));;odsecanje
+		  	(if (> V1 alfa ) (if (> V1 V) (MaxPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) (heuristikaStanja (car novaStanja)))) (MaxPomPetlja V (cdr novaStanja) V1 beta dubina stanjeHeuristikaNajbolje))
+		  	(MaxPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje)
+		  	))))
 
 	)
 
+
+
+(defun MinPotez (stanje alfa beta dubina )
+ 	(let* ((novaStanja  (generisiMogucaStanja stanje)) (V 50));;50 simulira beskonacno
+
+ 			(cond ( (or (zerop dubina) (null novaStanja)) (list stanje (heuristikaStanja stanje)) )
+ 					
+ 					
+
+ 					(t (MinPomPetlja V novaStanja alfa beta dubina nil )
+
+
+ 			)
+ 	) )
+ )
+
+(defun MinPomPetlja ( V novaStanja alfa beta dubina stanjeHeuristikaNajbolje)
+			(if (null novaStanja  )   stanjeHeuristikaNajbolje 
+			(let* ((V1 (cadr(MaxPotez (car novaStanja) alfa beta (1- dubina ) ) ) ))
+			
+		  	(if (<= V1 alfa ) (list (car novaStanja) (heuristikaStanja (car novaStanja)));;odsecanje
+		  	(if (< V1 beta ) (if (< V1 V) (MinPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) (heuristikaStanja (car novaStanja))) ) (MinPomPetlja V (cdr novaStanja) alfa V1 dubina stanjeHeuristikaNajbolje))
+		  	(MinPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje )
+		  	))))
 )
 
-
-(defun obradiPotomkeMin (potomci dubina alfa beta igrac maxDubina najboljeStanje)
-	(cond ((null potomci) (list beta najboljeStanje) ) 
-		  (t (let* ((novoBetaStanije (alfaBetaOdsecanje (car potomci) dubina alfa beta igrac maxDubina)) (novobeta (car novoBetaStanije)) (novoStanje (cadr novoBetaStanije)) )
-
-		  	(if (< novobeta beta) (if (< novobeta alfa) (list novobeta novoStanje) (obradiPotomkeMin (cdr potomci) dubina alfa novobeta igrac maxDubina novoStanje))
-
-		  		(progn  (obradiPotomkeMin (cdr potomci) dubina alfa beta igrac maxDubina najboljeStanje))
-		  	)
-		  	))
-
-	)
-
-)
-
-
-
-;(print (heuristikaStanja stanje ))
-;(trace obradiPotomkeMin)
-;(trace alfaBetaOdsecanje)
+	
+;(trace MaxPotez)
+;(trace MinPotez)
+;(trace MaxPomPetlja)
+;(trace MinPomPetlja)
+;(trace heuristikaStanja)
 (main)
 
+;alfa je najboja alternativa za max igraca
+;beta je najboja alternativa za min igraca
