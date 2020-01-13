@@ -502,7 +502,7 @@
 
 (defun generisiStanja1 (x y x1 y1 trenutnaVisina visinaNaKojuSeIde visinaSaKojePomera  stanje)
 
-  ( cond (  (or (>= trenutnaVisina visinaNaKojuSeIde )  (>= trenutnaVisina visinaSaKojePomera) ) '() )
+  ( cond (  (or (and (>= trenutnaVisina visinaNaKojuSeIde ) (or (not(eq trenutnaVisina 0) ) (not (eq visinaNaKojuSeIde 0) )))  (>= trenutnaVisina visinaSaKojePomera) ) '() )
          (t 
 
 
@@ -620,12 +620,20 @@
 
 
 
-
+(defun promeniIgraca (stanje)
+	(list (car stanje)  (if (equalp (caadr stanje) "X")  (list "O" (mod (+ (cadadr stanje) 1 ) 2))  (list "X" (mod (+ (cadadr stanje) 1 ) 2))) (caddr stanje) (cadddr stanje))
+)
 
 (defun unesiPotez (stanje)
 	(progn (format t "~% Unesite potez :")
 
-		(read-char ) 
+
+		(let* ((prvoSlovo (read-line) ))
+
+			(if(equalp prvoSlovo "n" )  (igraj (promeniIgraca stanje) (cadddr stanje))  
+		(
+			progn
+		(read-char)
 		(read-char ) 
 		(read-char ) 
 
@@ -671,6 +679,10 @@
 
 	       		)
 	       	 )
+	      	)
+		)
+
+)
 )
 )
 
@@ -757,8 +769,10 @@
 			(let* ((stanjeNovo (car (MaxPotez stanje -50 50 2 ))));;da se proveri sta treba za alfu i za betu inicijalno
 
 				(crtajMatricu stanjeNovo)
+				(if (equalp (cadadr stanjeNovo) 0 )
+				(igraj (promeniIgraca stanje) (cadddr stanje))
 				(igraj stanjeNovo velicinaTable)
-
+				)
 				)
 		)
 
@@ -860,7 +874,35 @@ let* ((naPotezu (caadr stanje) )  (brojStekovaX (caaddr stanje)) (brojStekovaO (
 		  	))))
 )
 
-	
+
+
+
+(defun igraSeNaStek (stanje)
+	(
+		let  ((brojN (cadddr stanje) ))
+		(list 'igraSeNa brojN)
+	)
+)
+
+(defun trenutnoStekovaX (stanje)
+	(
+		let  ((brojX (caaddr stanje) ))
+		 (list 'TrenutnostekovaX brojX)
+	)
+)
+
+(defun trenutnoStekovaY (stanje)
+	(
+		let  ((brojY (cadr(nth 2 stanje)) ))
+		 (list 'TrenutnostekovaY brojY)
+	)
+)
+
+
+
+;(print (trenutnoStekovaY stanje))
+
+;(print (igraSeNaStek stanje))
 ;(trace MaxPotez)
 ;(trace MinPotez)
 ;(trace MaxPomPetlja)
