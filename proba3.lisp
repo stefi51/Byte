@@ -745,7 +745,7 @@
 			progn 
 			(format t "Igra racunar")
 
-			(let* ((stanjeNovo (car (MaxPotez stanje -50 50   2 2 ))));;da se proveri sta treba za alfu i za betu inicijalno
+			(let* ((stanjeNovo (car (MaxPotez stanje -50 50   4 4 ))));;da se proveri sta treba za alfu i za betu inicijalno
 
 				(crtajMatricu stanjeNovo)
 				(if (equalp (cadadr stanjeNovo) 0 )
@@ -800,7 +800,7 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
           
           
 
-          (t (MaxPomPetlja V novaStanja alfa beta dubina (list (list NIL) -5) dubinapom )
+          (t (MaxPomPetlja V novaStanja alfa beta dubina nil dubinapom )
 
       )
   ) )
@@ -809,16 +809,24 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 (defun MaxPomPetlja ( V novaStanja alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
       (if (null novaStanja) stanjeHeuristikaNajbolje
       (let* ((V1 (cadr(MinPotez (car novaStanja) alfa beta (1- dubina ) dubinapom )))  )
-      
+      	
         
-        (if (>= V1 beta ) (list (car novaStanja) (heuristikaStanja (car novaStanja) dubinapom));;odsecanje
-        (if (> V1 alfa ) (if (> V1 V) (MaxPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) (heuristikaStanja (car novaStanja) dubinapom)) dubinapom) (MaxPomPetlja V (cdr novaStanja) V1 beta dubina stanjeHeuristikaNajbolje dubinapom))
-        (MaxPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
+        (if (>= V1 beta ) (list (car stanjeHeuristikaNajbolje) V);;odsecanje
+        (if (and (> V1 alfa )  (> V1 V)) (MaxPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) V1) dubinapom) 
+        	(if (> V1 alfa )
+
+        	(MaxPomPetlja V (cdr novaStanja) V1 beta dubina stanjeHeuristikaNajbolje dubinapom)
+
+        		(if (> V1 V )
+        			(MaxPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
+        		(MaxPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
+        	)
+        
 
        
         ))))
 
-  )
+  ))
 
 
 
@@ -829,7 +837,7 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
           
           
 
-          (t (MinPomPetlja V novaStanja alfa beta dubina (list (list NIL) 5) dubinapom )
+          (t (MinPomPetlja V novaStanja alfa beta dubina nil dubinapom )
 
 
       )
@@ -837,17 +845,24 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
  )
 
 (defun MinPomPetlja ( V novaStanja alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
-      (if (null novaStanja  )   stanjeHeuristikaNajbolje 
-      (let* ((V1 (cadr(MaxPotez (car novaStanja) alfa beta (1- dubina ) dubinapom ) ) ))
-        (progn
-          
-        (if (<= V1 alfa ) (list (car novaStanja) (heuristikaStanja (car novaStanja) dubinapom));;odsecanje
-        (if (< V1 beta ) (if (< V1 V) (MinPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) (heuristikaStanja (car novaStanja) dubinapom)) dubinapom ) (MinPomPetlja V (cdr novaStanja) alfa V1 dubina stanjeHeuristikaNajbolje dubinapom))
-        (MinPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom )
+       (if (null novaStanja) stanjeHeuristikaNajbolje
+      (let* ((V1 (cadr(MaxPotez (car novaStanja) alfa beta (1- dubina ) dubinapom )))  )
+      	
+        
+        (if (<= V1 alfa ) (list (car stanjeHeuristikaNajbolje) V);;odsecanje
+        (if (and (< V1 V )  (< V1 beta)) (MinPomPetlja V1 (cdr novaStanja) alfa V1 dubina (list (car novaStanja) V1) dubinapom) 
+        	(if (< V1 beta )
 
-        )
+        	(MinPomPetlja V (cdr novaStanja) alfa V1 dubina stanjeHeuristikaNajbolje dubinapom)
 
-        ))))
+        		(if (< V1 V )
+        			(MinPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
+        		(MinPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
+        	)
+        
+
+       
+        )))))
 )
 ;(trace MinPomPetlja)
 
