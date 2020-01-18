@@ -745,7 +745,7 @@
 			progn 
 			(format t "Igra racunar")
 
-			(let* ((stanjeNovo (car (MaxPotez stanje -50 50   4 4 ))));;da se proveri sta treba za alfu i za betu inicijalno
+			(let* ((stanjeNovo (car (MaxPotez stanje -50 50   5 5 ))));;da se proveri sta treba za alfu i za betu inicijalno
 
 				(crtajMatricu stanjeNovo)
 				(if (equalp (cadadr stanjeNovo) 0 )
@@ -784,11 +784,16 @@
 (defun heuristikaStanja (stanje dubinapom) (
 let* ((procenaStanja (donesiZakljucak stanje))  )
 	(
-    cond ((=(mod dubinapom 2) 0) procenaStanja )
+		progn
+			(print procenaStanja)
+			(print dubinapom)
+			(print stanje)
+   ( cond ((=(mod dubinapom 2) 0) procenaStanja )
          ((=(mod dubinapom 2) 1) (- 0 procenaStanja))
          (t 0)
      
 	)
+   )
 	
 ))
 
@@ -965,7 +970,9 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 (defun !diffTwo (a b )
 (eq (- a 2) b)
   )
-
+(defun first(a b)
+(equalp (car a) b
+	))
 
 
 (defparameter *T1-RULES* '(
@@ -976,13 +983,13 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 
     (if (and  (STEK ?x ?y ?z) (!nti ?x ?n 1)) then (PostojiZetonDole ?n))
 
-    (if (and (STEK ?x ?y ?z) (!visina ?x 5) (STEK ?j ?m ?k) (!visina ?j 3) (!potez ?y ?z ?m ?k) ) then (PostojiPetITriDirektno ?x ?j))
+      (if (and (Stek ?x ?y ?z) (!visina ?x '5) (Stek ?j ?m ?k) (!visina ?j '3) (!potez ?y ?z ?m ?k) (!vrhOsnoveL ?j ?b )) then (PostojiPetITriDirektno ?x ?j ?b))
 
-    (if (and (STEK ?x ?y ?z) (!visina ?x 6) (STEK ?j ?m ?k) (!visina ?j 2) (!potez ?y ?z ?m ?k) ) then (PostojiSestIDvaDirektno ?x ?j))
+    (if (and (Stek ?x ?y ?z) (!visina ?x '6) (Stek ?j ?m ?k) (!visina ?j '2) (!potez ?y ?z ?m ?k) (!vrhOsnoveL ?j ?b )) then (PostojiSestIDvaDirektno ?x ?j ?b))
 
-    (if (and (STEK ?x ?y ?z) (!visina ?x 4) (STEK ?j ?m ?k) (!visina ?j 4) (!potez ?y ?z ?m ?k) ) then (PostojiCetiriICetiriDirektno ?x ?j))
+    (if (and (Stek ?x ?y ?z) (!visina ?x '4) (Stek ?j ?m ?k) (!visina ?j '4) (!potez ?y ?z ?m ?k) (!vrhOsnoveL ?j ?b )) then (PostojiCetiriICetiriDirektno ?x ?j ?b))
 
-    (if (and (STEK ?x ?y ?z) (!visina ?x 7) (STEK ?j ?m ?k) (!visina ?j 1) (!potez ?y ?z ?m ?k) ) then (PostojiSedamIJedanDirektno ?x ?j))
+    (if (and (Stek ?x ?y ?z) (!visina ?x '7) (Stek ?j ?m ?k) (!visina ?j '1) (!potez ?y ?z ?m ?k) (!vrhOsnoveL ?j ?b ) ) then (PostojiSedamIJedanDirektno ?x ?j ?b))
 
     (if (and (STEK ?x ?y ?z) (!visina ?x 5) (STEK ?j ?m ?k) (!visinaVecaOd ?j 3) (!potez ?y ?z ?m ?k) (!postojiPodstekOsnoveLVisineN ?j ?b 3 ) (!vrhOsnoveL ?j ?b ) ) then (PostojiPetITriDaSePrebaci ?x ?j ?b))
 
@@ -992,13 +999,13 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 
     (if (and (STEK ?x ?y ?z) (!visina ?x 7) (STEK ?j ?m ?k) (!visinaVecaOd ?j 1) (!potez ?y ?z ?m ?k) (!postojiPodstekOsnoveLVisineN ?j ?b 1 ) (!vrhOsnoveL ?j ?b )) then (PostojiSedamIJedan ?x ?j ?b))
 
-    (if (and (PostojiPetITriDirektno  ?x ?j) (!nti ?j ?z 1)) then (PostojiDirektno ?z))
+    (if (and (PostojiPetITriDirektno  ?x ?j ?b) (!nti ?j ?b '1)) then (PostojiDirektno ?b))
 
-    (if (and (PostojiSestIDvaDirektno ?x ?j) (!nti ?j ?z 1)) then (PostojiDirektno ?z))
+    (if (and (PostojiSestIDvaDirektno ?x ?j ?b) (!nti ?j ?b '1)) then (PostojiDirektno ?b))
 
-    (if (and (PostojiCetiriICetiriDirektno ?x ?j) (!nti ?j ?z 1)) then (PostojiDirektno ?z))
+    (if (and (PostojiCetiriICetiriDirektno ?x ?j ?b) (!nti ?j ?b '1)) then (PostojiDirektno ?b))
 
-    (if (and (PostojiSedamIJedanDirektno ?x ?j) (!nti ?j ?z 1)) then (PostojiDirektno ?z))
+    (if (and (PostojiSedamIJedanDirektno ?x ?j ?b) (!nti ?j ?b '1)) then (PostojiDirektno ?b))
 
     (if  (PostojiPetITriDaSePrebaci ?x ?j ?b)  then (PostojiIndirektno ?b))
 
@@ -1028,7 +1035,7 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 
     (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(!eq 2 ?y) )then (PobedaYO 10))
 
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(!eq 2 ?y) )then (GubiXD -10))
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(!eq 2 ?y) )then (GubiXO -10))
 
 
     (if (and (IGRASENA '8)(TRENUTNOSTEKOVAX ?y)(!eq 2 ?y) )then (PobedaXO 10))
