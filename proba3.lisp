@@ -609,7 +609,7 @@
 
 		(let* ((prvoSlovo (read-line) ))
 
-			(if(equalp prvoSlovo "n" )  (igraj (promeniIgraca stanje) (cadddr stanje))  
+			(if(equalp prvoSlovo "n" )   (promeniIgraca stanje) 
 		(
 			progn
 		(read-char)
@@ -785,9 +785,9 @@
 let* ((procenaStanja (donesiZakljucak stanje))  )
 	(
 		progn
-			(print procenaStanja)
-			(print dubinapom)
-			(print stanje)
+			;(print procenaStanja)
+			;(print dubinapom)
+			;(print stanje)
    ( cond ((=(mod dubinapom 2) 0) procenaStanja )
          ((=(mod dubinapom 2) 1) (- 0 procenaStanja))
          (t 0)
