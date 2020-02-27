@@ -180,7 +180,6 @@
 )
 
 
-;da se obradi slucaj kada se pomera na taj najblizi tipa pomera se sa 1 1 na 2 2 !!!!!!!!!!!!
  ;(print (daLiSePriblizavaNajblizem potez  (izbaciPotez (zetoniNaTabli (inicijalizuj (praviTablu 8 8) ) 0)  potez )))
 
 
@@ -609,7 +608,7 @@
 
 		(let* ((prvoSlovo (read-line) ))
 
-			(if(equalp prvoSlovo "n" )   (promeniIgraca stanje) 
+			(if(equalp prvoSlovo "n" )   (promeniIgraca stanje)   
 		(
 			progn
 		(read-char)
@@ -706,7 +705,7 @@
 (defun main ()
 (let* ((stanje (unetiVelicinuTable) )     )
 	    ( crtajMatricu stanje)
-		(igraj  stanje  (car (reverse stanje)) )
+		(igraj  stanje  (car (reverse stanje)) 1 0 )
 
 )
 )
@@ -728,12 +727,34 @@
 	)
 )
 
+(defun vratiPomDubinu (brojPoteza n brXIbrY) (
+   cond ((and (= n 8) (< brojPoteza  4)) 2)
+		((and (= n 8)(< brojPoteza 6) ) 3)
+
+		( (and (= n 8) (= (+ (car brXIbrY) (cadr brXIbrY) ) 0) ) 3)
+		((and (= n 8)(< brojPoteza 9) ) 4)
+
+		((and (= n 8) (= (+ (car brXIbrY) (cadr brXIbrY) ) 1) ) 4)
+
+		((and (= n 8)(< brojPoteza 12) ) 5)
+		;-----------------------------------------------------------------------
+		((and (= n 10) (< brojPoteza 12)) 2)
+		((and (= n 10)(< brojPoteza 17) ) 3)
+		((and (= n 10) (<= (+ (car brXIbrY) (cadr brXIbrY) ) 1) ) 3)
+		
+
+		((and (= n 10)(< brojPoteza 20) ) 4)
+		((and (= n 10) (<= (+ (car brXIbrY) (cadr brXIbrY) ) 3) ) 4)
+		((and (= n 10)(< brojPoteza 26) ) 5)
+		(t 6)
+
+) )
 
 
 
 
 
-(defun igraj (stanje velicinaTable)
+(defun igraj (stanje velicinaTable dubina brPoteza)
 
 	( 		cond ( (not (equal (proveriCiljnoStanje stanje velicinaTable) nil )) (format t "Pobednik je: ~a" (proveriCiljnoStanje stanje velicinaTable) ) )
 	
@@ -744,16 +765,20 @@
 		(
 			progn 
 			(format t "Igra racunar")
-
-			(let* ((stanjeNovo (car (MaxPotez stanje -50 50   5 5 ))));;da se proveri sta treba za alfu i za betu inicijalno
-
+			(let* ((dubina (vratiPomDubinu brPoteza velicinaTable (caddr stanje)))   (vracenoIzMinMax (MaxPotez stanje -50 50   dubina dubina )) (stanjeNovo (car vracenoIzMinMax) ));;da se proveri sta treba za alfu i za betu inicijalno
+				;(print "vracena heuristika iz minMax")
+				;(print(cadr vracenoIzMinMax))
+				;(print dubina)
+				;(print brPoteza)
 				(crtajMatricu stanjeNovo)
 				(if (equalp (cadadr stanjeNovo) 0 )
-				(igraj (promeniIgraca stanje) (cadddr stanje))
-				(igraj stanjeNovo velicinaTable)
+				(igraj (promeniIgraca stanje) (cadddr stanje) dubina  brPoteza )
+				(igraj stanjeNovo velicinaTable dubina (+ brPoteza 1))
 				)
 				)
-		)
+
+		
+			)
 
 		 (
 
@@ -763,7 +788,7 @@
              (let* ((stanjeNovo (odigrajIProveriValidan stanje)))
 
 				(crtajMatricu stanjeNovo)
-				(igraj stanjeNovo velicinaTable)
+				(igraj stanjeNovo velicinaTable dubina brPoteza)
 
 			)
 		
@@ -783,11 +808,11 @@
 
 (defun heuristikaStanja (stanje dubinapom) (
 let* ((procenaStanja (donesiZakljucak stanje))  )
-	(
-		progn
-			;(print procenaStanja)
-			;(print dubinapom)
-			;(print stanje)
+	;(
+	;	progn
+	;		(print procenaStanja)
+	;		(print dubinapom)
+	;		(print stanje)
    ( cond ((=(mod dubinapom 2) 0) procenaStanja )
          ((=(mod dubinapom 2) 1) (- 0 procenaStanja))
          (t 0)
@@ -795,7 +820,8 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 	)
    )
 	
-))
+)
+;)
 
 ;(untrace heuristikaStanja)
 (defun MaxPotez (stanje alfa beta dubina dubinapom)
@@ -815,21 +841,34 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
       (if (null novaStanja) stanjeHeuristikaNajbolje
       (let* ((V1 (cadr(MinPotez (car novaStanja) alfa beta (1- dubina ) dubinapom )))  )
       	
+
+
+  ( cond ((and (>= V1 beta ) (> V1 V )) (list (car stanjeHeuristikaNajbolje) V1) )
+         ((>= V1 beta ) (list (car stanjeHeuristikaNajbolje) V))
+		 ((and (> V1 alfa )  (> V1 V)) (MaxPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) V1) dubinapom))
+		 ((> V1 alfa ) (MaxPomPetlja V (cdr novaStanja) V1 beta dubina stanjeHeuristikaNajbolje dubinapom))
+		 ((> V1 V ) (MaxPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom))
+		 (t (MaxPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom))
+     
+	)
+
         
-        (if (>= V1 beta ) (list (car stanjeHeuristikaNajbolje) V);;odsecanje
-        (if (and (> V1 alfa )  (> V1 V)) (MaxPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) V1) dubinapom) 
-        	(if (> V1 alfa )
+       ; (if (and (>= V1 beta ) (> V1 V )) (list (car stanjeHeuristikaNajbolje) V1);;odsecanje
+        	;(if (>= V1 beta ) (list (car stanjeHeuristikaNajbolje) V)
+       ;(if (and (> V1 alfa )  (> V1 V)) (MaxPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) V1) dubinapom) 
+        	;(if (> V1 alfa )
 
-        	(MaxPomPetlja V (cdr novaStanja) V1 beta dubina stanjeHeuristikaNajbolje dubinapom)
+        	;(MaxPomPetlja V (cdr novaStanja) V1 beta dubina stanjeHeuristikaNajbolje dubinapom)
 
-        		(if (> V1 V )
-        			(MaxPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
-        		(MaxPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
-        	)
+        		;(if (> V1 V )
+        			;(MaxPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
+        		;(MaxPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
+        	;)
         
 
        
-        ))))
+       ; ))))
+       )
 
   ))
 
@@ -854,21 +893,37 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
       (let* ((V1 (cadr(MaxPotez (car novaStanja) alfa beta (1- dubina ) dubinapom )))  )
       	
         
-        (if (<= V1 alfa ) (list (car stanjeHeuristikaNajbolje) V);;odsecanje
-        (if (and (< V1 V )  (< V1 beta)) (MinPomPetlja V1 (cdr novaStanja) alfa V1 dubina (list (car novaStanja) V1) dubinapom) 
-        	(if (< V1 beta )
+     ( cond ( (and (<= V1 alfa ) (< V1 V ) ) (list (car stanjeHeuristikaNajbolje) V1) )
+         ((<= V1 alfa ) (list (car stanjeHeuristikaNajbolje) V))
+		 ((and (< V1 V )  (< V1 beta)) (MinPomPetlja V1 (cdr novaStanja) alfa V1 dubina (list (car novaStanja) V1) dubinapom) )
+		 ((< V1 beta )
 
-        	(MinPomPetlja V (cdr novaStanja) alfa V1 dubina stanjeHeuristikaNajbolje dubinapom)
+        	(MinPomPetlja V (cdr novaStanja) alfa V1 dubina stanjeHeuristikaNajbolje dubinapom))
+		 ((< V1 V )
+        			(MinPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom))
+		 
+         (t (MinPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom))
+     
+	)
 
-        		(if (< V1 V )
-        			(MinPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
-        		(MinPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
-        	)
+
+        ;(if (and (<= V1 alfa ) (< V1 V ) ) (list (car stanjeHeuristikaNajbolje) V1);;odsecanje
+        	;(if (<= V1 alfa ) (list (car stanjeHeuristikaNajbolje) V)
+       ;(if (and (< V1 V )  (< V1 beta)) (MinPomPetlja V1 (cdr novaStanja) alfa V1 dubina (list (car novaStanja) V1) dubinapom) 
+        	;(if (< V1 beta )
+
+        	;(MinPomPetlja V (cdr novaStanja) alfa V1 dubina stanjeHeuristikaNajbolje dubinapom)
+
+        	;	(if (< V1 V )
+        		;	(MinPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
+        		;(MinPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
+        	;)
         
 
        
-        )))))
-)
+        ;)))))
+        )
+))
 ;(trace MinPomPetlja)
 
 
@@ -974,7 +1029,6 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 (equalp (car a) b
 	))
 
-
 (defparameter *T1-RULES* '(
 	
     (if (and (STEK ?x ?y ?z) (!visina ?x 1)) then (PostojiZeton ?x))
@@ -1015,66 +1069,65 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 
     (if  (PostojiSedamIJedan ?x ?j ?b)  then (PostojiIndirektno ?b))
 
-    (if (and  (TRENUTNOSTEKOVAX ?x) (TRENUTNOSTEKOVAY ?y) (!eq ?x ?y) ) then (Izjednaceno 1 ))
+   (if (and  (TRENUTNOSTEKOVAX ?x) (TRENUTNOSTEKOVAY ?y) (!eq ?x ?y) ) then (Izjednaceno 1 ))
 
     (if (Izjednaceno ?x ) then (Oceni ?x "X"))
 
     (if (Izjednaceno ?x ) then (Oceni ?x "O"))
 
    
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(!eq '3 ?y) )then (PobedaYD 10))
 
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(!eq 3 ?y) )then (PobedaYD 10))
-
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(!eq 3 ?y) )then (GubiXD -10))
-
-
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAX ?y)(!eq 3 ?y) )then (PobedaXD 10))
-
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAX ?y)(!eq 3 ?y) )then (GubiYD -10))
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(!eq '3 ?y) )then (GubiXD -10))
 
 
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(!eq 2 ?y) )then (PobedaYO 10))
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAX ?y)(!eq '3 ?y) )then (PobedaXD 10))
 
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(!eq 2 ?y) )then (GubiXO -10))
-
-
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAX ?y)(!eq 2 ?y) )then (PobedaXO 10))
-
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAX ?y)(!eq 2 ?y) )then (GubiYO -10))
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAX ?y)(!eq '3 ?y) )then (GubiYD -10))
 
 
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?x ?y) (!noteq ?x 2) )then (VodiXO 5))
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(!eq '2 ?y) )then (PobedaYO 10))
 
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?x ?y) (!noteq ?x 2) )then (GubiYO -5))
-
-
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?y ?x) (!noteq ?y 2))then (VodiYO 5))
-
-    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?y ?x) (!noteq ?y 2))then (GubiXO -5))
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(!eq '2 ?y) )then (GubiXO -10))
 
 
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAX ?y)(!eq '2 ?y) )then (PobedaXO 10))
 
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?y ?x) (!noteq ?y 3) )then (VodiYD 6))
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAX ?y)(!eq '2 ?y) )then (GubiYO -10))
 
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?y ?x) (!noteq ?y 3) )then (GubiXD -6))
+
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?x ?y) (!noteq ?x '2) )then (VodiXO 5))
+
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?x ?y) (!noteq ?x '2) )then (GubiYO -5))
+
+
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?y ?x) (!noteq ?y '2))then (VodiYO 5))
+
+    (if (and (IGRASENA '8)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!gt ?y ?x) (!noteq ?y '2))then (GubiXO -5))
 
 
 
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?x ?y) (!noteq ?x 3) )then (VodiXD 6))
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?y ?x) (!noteq ?y '3) )then (VodiYD 6))
 
-     (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?x ?y) (!noteq ?x 3) )then (GubiYD -6))
-
-
-
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?y ?x) (!noteq ?y 2) )then (VodiYD 8))
-
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?y ?x) (!noteq ?y 2) )then (GubiXD -8))
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?y ?x) (!noteq ?y '3) )then (GubiXD -6))
 
 
 
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?x ?y) (!noteq ?x 2) )then (VodiXD 8))
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?x ?y) (!noteq ?x '3) )then (VodiXD 6))
 
-    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?x ?y) (!noteq ?x 2) )then (GubiYD -8))
+     (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffOne ?x ?y) (!noteq ?x '3) )then (GubiYD -6))
+
+
+
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?y ?x) (!noteq ?y '3) )then (VodiYD 8))
+
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?y ?x) (!noteq ?y '3) )then (GubiXD -8))
+
+
+
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?x ?y) (!noteq ?x '3) )then (VodiXD 8))
+
+    (if (and (IGRASENA '10)(TRENUTNOSTEKOVAY ?y)(TRENUTNOSTEKOVAX ?x)(!diffTwo ?x ?y) (!noteq ?x '3) )then (GubiYD -8))
 
 
 
@@ -1122,7 +1175,9 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
  )
 
 )
-
+(defun suprotniZeton(x)
+  (cond ((equalp x "X") "O") (t "X"))
+	)
 
 
 (defun donesiZakljucak (stanje)
@@ -1137,17 +1192,21 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 			   (potez2 (list 'PostojiZetonDole (caadr stanje)) )
          (potez3 (list 'PostojiIndirektno (caadr stanje)) )
          (potez4 (list 'PostojiDirektno (caadr stanje)) )
+         (potez5 (list 'PostojiIndirektno (suprotniZeton (caadr stanje))) )
+         (potez6 (list 'PostojiDirektno (suprotniZeton(caadr stanje)) ))
 
 			    (ocenaTrenutnihStekova (cadaar(infer potez)) )
 				(postojiZetonBoje (count-results potez1))
 				(postojiZetonDole (count-results potez2))
         (postojiIndirektno (count-results potez3))
           (postojiDirektno (count-results potez4))
+          (postojiIndirektnoSuprotno (count-results potez5))
+          (postojiDirektnoSuprotno (count-results potez6))
 
 			
 			
 			)
-		(+ (* postojiDirektno 0.7) (* ocenaTrenutnihStekova 0.15) (* postojiZetonDole 0.01) (* postojiZetonBoje 0.01) (* postojiIndirektno 0.6))
+		(- (+  (* ocenaTrenutnihStekova 0.1) (* postojiZetonDole 0.01) (* postojiZetonBoje 0.01) (* postojiDirektno 0.2) (* postojiIndirektno 0.2)) (* postojiIndirektnoSuprotno 0.4)(* postojiDirektnoSuprotno 0.4))
   
 
 		)
