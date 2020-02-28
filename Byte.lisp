@@ -682,10 +682,8 @@
  		  )
 )
 
-;(proveriDaLiUnosKorektan (list A 5))
-;(setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
 
-;(unesiPotez stanje)
+;(setq stanje (inicijalnoStanje (inicijalizuj (praviTablu 8 8)  ) 8) )
 
 (defun unetiVelicinuTable () 
 	(
@@ -707,8 +705,7 @@
 	    ( crtajMatricu stanje)
 		(igraj  stanje  (car (reverse stanje)) 1 0 )
 
-)
-)
+))
 
 
 
@@ -781,7 +778,6 @@
 			)
 
 		 (
-
 			progn 
 			(format t "Igra covek")
 
@@ -792,15 +788,7 @@
 
 			)
 		
-
-
-		 )	
-	)
-
-     )
-
-	)
-)
+ )))))
 
  ;proveriCiljnoStanje (stanje velicinaTable)
 ;(trace main)
@@ -823,7 +811,7 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 )
 ;)
 
-;(untrace heuristikaStanja)
+
 (defun MaxPotez (stanje alfa beta dubina dubinapom)
   (let* ((novaStanja  (generisiMogucaStanja stanje)) (V -50));;-50 simulira -beskonacno
 
@@ -853,21 +841,7 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 	)
 
         
-       ; (if (and (>= V1 beta ) (> V1 V )) (list (car stanjeHeuristikaNajbolje) V1);;odsecanje
-        	;(if (>= V1 beta ) (list (car stanjeHeuristikaNajbolje) V)
-       ;(if (and (> V1 alfa )  (> V1 V)) (MaxPomPetlja V1 (cdr novaStanja) V1 beta dubina (list (car novaStanja) V1) dubinapom) 
-        	;(if (> V1 alfa )
-
-        	;(MaxPomPetlja V (cdr novaStanja) V1 beta dubina stanjeHeuristikaNajbolje dubinapom)
-
-        		;(if (> V1 V )
-        			;(MaxPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
-        		;(MaxPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
-        	;)
-        
-
-       
-       ; ))))
+      
        )
 
   ))
@@ -907,24 +881,10 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 	)
 
 
-        ;(if (and (<= V1 alfa ) (< V1 V ) ) (list (car stanjeHeuristikaNajbolje) V1);;odsecanje
-        	;(if (<= V1 alfa ) (list (car stanjeHeuristikaNajbolje) V)
-       ;(if (and (< V1 V )  (< V1 beta)) (MinPomPetlja V1 (cdr novaStanja) alfa V1 dubina (list (car novaStanja) V1) dubinapom) 
-        	;(if (< V1 beta )
-
-        	;(MinPomPetlja V (cdr novaStanja) alfa V1 dubina stanjeHeuristikaNajbolje dubinapom)
-
-        	;	(if (< V1 V )
-        		;	(MinPomPetlja V1 (cdr novaStanja) alfa beta dubina (list (car novaStanja) V1) dubinapom)
-        		;(MinPomPetlja V (cdr novaStanja) alfa beta dubina stanjeHeuristikaNajbolje dubinapom)
-        	;)
-        
-
        
-        ;)))))
-        )
+     )
 ))
-;(trace MinPomPetlja)
+
 
 
 (defun igraSeNaStek (stanje)
@@ -1162,9 +1122,6 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 
 ))
 	
-
-
-
                 
 (defun stanjeUCinjenice (stanje)
 	
@@ -1214,7 +1171,6 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 	)
 
 )
-
 
 
 (main)
