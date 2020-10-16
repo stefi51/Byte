@@ -1173,4 +1173,11 @@ let* ((procenaStanja (donesiZakljucak stanje))  )
 )
 
 
+(defun igraSeNaStek1 (stanje)
+	(
+		let  ((brojN (cadddr stanje) ))
+		(list 'IgraSeNa (list 'quote  brojN))
+	)
+) 
+
 (main)
